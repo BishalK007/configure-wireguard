@@ -85,9 +85,10 @@ sudo sysctl -w net.ipv4.ip_forward=1
 ```
 
 ### Step 4: Adjust UFW Forward Policy
-first allow ssh in efw-
+first allow ssh and 51820 (wireguard port) in efw-
 ```bash
 sudo ufw allow ssh
+sudo ufw allow 51820/udp
 ```
 then enable ufw -
 ```bash
