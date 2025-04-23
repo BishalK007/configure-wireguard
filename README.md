@@ -8,7 +8,10 @@ A secure WireGuard VPN on an EC2 t2.nano can be fully automated at boot by combi
 ### Step 1: Install and Enable WireGuard
 install wireguard and generate keys
 ```bash
-sudo -i 
+sudo -i
+```
+then:
+```bash
 sudo apt update                                           
 sudo apt install wireguard -y                             
 sudo mkdir -p /etc/wireguard                              
@@ -28,8 +31,7 @@ Now do a
 cat private.key
 ```
 it will show somw thing like-
-```
-cat private.key
+```bash
 PVTKEYSERVERXXXXXXX....=
 ```
 Do a 
@@ -47,10 +49,31 @@ PostDown    = iptables -t nat -D POSTROUTING -o enX0 -j MASQUERADE
 
 # Later you’ll add [Peer] blocks here for each client
 ```
+here to check the network interface do this-
+```bash
+ip a
+```
+the output will look like this-
+```bash
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute
+       valid_lft forever preferred_lft forever
+2: enX0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 9001 qdisc fq_codel state UP group default qlen 1000
+    link/ether 0a:ff:cb:a5:e4:b3 brd ff:ff:ff:ff:ff:ff
+    inet 172.31.23.147/20 metric 100 brd 172.31.31.255 scope global dynamic enX0
+       valid_lft 3316sec preferred_lft 3316sec
+    inet6 fe80::8ff:cbff:fea5:e4b3/64 scope link
+       valid_lft forever preferred_lft forever
+```
+here `enX0` is the interface name
+
 ### Step 3: Enable Kernel IP Forwarding
 Do a
 ```bash
-/etc/ufw/sysctl.conf
+sudo nano /etc/ufw/sysctl.conf
 ```
 and uncomment or add:
 ```bash
@@ -62,7 +85,15 @@ sudo sysctl -w net.ipv4.ip_forward=1
 ```
 
 ### Step 4: Adjust UFW Forward Policy
-edit `/etc/default/ufw`
+first allow ssh in efw-
+```bash
+sudo ufw allow ssh
+```
+then enable ufw -
+```bash
+sudo ufw enable
+```
+edit `/etc/default/ufw` to add forward policy
 ```bash
 sudo nano /etc/default/ufw
 ```
@@ -124,7 +155,10 @@ PostDown    = iptables -t nat -D POSTROUTING -o enX0 -j MASQUERADE
 PublicKey    = <client_public_key>
 AllowedIPs   = 10.0.0.2/32
 ```
-
+Then do a reload
+```bash
+sudo systemctl reload wg-quick@wg0
+```
 
 
 
